@@ -1,6 +1,6 @@
 # mssl - My Simple Scripting Language
 
-I wanted to understand how compiler work so I created one
+I wanted to understand how compiler works so I created one
 
 ### Code example
 
@@ -22,5 +22,23 @@ fn dummy_function(a: i32, b: i32) -> i32 {
 # Right now i32 is the only supported type
 let first_num = 2;
 let second_num = 5;
+```
+
+## Instalation
+
+// TODO: fill this
+
+### Vim config
+
+I wrote configuration for Vim to support **mssl**. To enable it run
+```sh
+$ mkdir -p ~/.vim/syntax
+$ cp misc/mssl.vim ~/.vim/syntax
+```
+
+and add this line to your `.vimrc`
+
+```vim
+au BufRead,BufNewFile *.mssl setfiletype mssl
 ```
 
