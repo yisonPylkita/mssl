@@ -1,10 +1,3 @@
-# mssl - My Simple Scripting Language
-
-I wanted to understand how compiler work so I created one
-
-### Code example
-
-```
 # My simple programming language
 
 # This is a comment
@@ -19,8 +12,13 @@ fn dummy_function(a: i32, b: i32) -> i32 {
 }
 
 # We can have variable declarations
-# Right now i32 is the only supported type
+# Right now i32 and str are the only supported types
 let first_num = 2;
 let second_num = 5;
-```
+let str = "Some text";
+let str = 'Some text';
+
+# Console IO with built-in functions
+let age_us = readline('Please input your age');
+println('You are {} years old', age_us);
 
