@@ -20,7 +20,6 @@ pub enum Token {
     Quote,
     DoubleQuote,
     ExclamationMark,
-    Hash,
     LeftBrace,
     RightBrace,
     LeftParenthesis,
@@ -40,11 +39,16 @@ pub enum Token {
     Const,
 
     // Others
+    Comment(String),
     StringLiteral(String),
-    Integer(String),
-    Float(String),
+    Integer(u32),
+    // TODO: add support for negative numbers
     Name(String),
 }
+
+const keywords_map: std::vec::Vec<(&str, Token)> = vec![("if", Token::If), ("else", Token::Else), ("return", Token::Return),
+                                                        ("fn", Token::Function), ("loop", Token::Loop), ("for", Token::For),
+                                                        ("in", Token::In), ("let", Token::Let), ("const", Token::Const)];
 
 pub struct Lexer {
     index: usize,
@@ -92,10 +96,10 @@ impl Lexer {
                     '=' => Token::Assign,
                     '>' => Token::Greater,
                     '<' => Token::Lower,
-                    '\'' => Token::Quote,
-                    '"' => Token::DoubleQuote,
+                    '\'' => Token::Quote, // StringLiteral(String), -> this should be handled when ' is detected
+                    '"' => Token::DoubleQuote, // StringLiteral(String), -> this should be handled when " is detected
                     '!' => Token::ExclamationMark,
-                    '#' => Token::Hash,
+                    '#' => Token::Comment("TODO: fix me".to_string()),
                     '{' => Token::LeftBrace,
                     '}' => Token::RightBrace,
                     '(' => Token::LeftParenthesis,
@@ -107,14 +111,31 @@ impl Lexer {
                 self.index += 1;
                 tokens.push(found_token);
             } else {
-                for checked_token in [
-                    ("if", Token::If), ("else", Token::Else), ("return", Token::Return),
-                    ("fn", Token::Function), ("loop", Token::Loop), ("for", Token::For),
-                    ("in", Token::In), ("let", Token::Let), ("const", Token::Const)].iter() {
-                    if Lexer::contains(source_code.to_string(), checked_token.0.to_string(), self.index) {
-                        tokens.push(checked_token.1.clone());
-                        self.index += checked_token.0.len();
-                        break;
+                let keword_result = keywords_map.iter().position(|&token| Lexer::contains(source_code.to_string(), token.0.to_string(), self.index));
+                let mut found_keyword = false; // TODO: fix this crap. Do a proper if/else if/else outside
+                match keword_result {
+                    Some(index) => {
+                        tokens.push(keywords_map[index].1.clone());
+                        self.index += keywords_map[index].0.len();
+                        found_keyword = true;
+                    }
+                    None => (),
+                };
+
+                if !found_keyword {
+                    // Integer(String),
+                    if code_chars[self.index].is_numeric() {
+                        let mut number_buffer = String::new();
+                        loop {
+                            if code_chars[self.index].is_numeric() {
+                                number_buffer.push(code_chars[self.index]);
+                                self.index += 1;
+                            } else {
+                                break;
+                            }
+                        }
+                        let parsed_number = number_buffer.parse().unwrap();
+                        tokens.push(Token::Integer(parsed_number));
                     }
                 }
             }
@@ -122,7 +143,7 @@ impl Lexer {
     }
 
     fn contains(source: String, token: String, index: usize) -> bool {
-        index + token.len() <= source.len() && source[index..index+token.len()] == token
+        index + token.len() <= source.len() && source[index..index + token.len()] == token
     }
 }
 
@@ -134,6 +155,7 @@ mod tests {
         let mut lex = Lexer::new();
         lex.tokenize(&code)
     }
+
     #[test]
     fn lexer_single_sign() {
         assert_eq!(lex("".to_string()), Ok(vec![]));
@@ -154,7 +176,7 @@ mod tests {
         assert_eq!(lex("\"".to_string()), Ok(vec![Token::DoubleQuote]));
         assert_eq!(lex("\'".to_string()), Ok(vec![Token::Quote]));
         assert_eq!(lex("!".to_string()), Ok(vec![Token::ExclamationMark]));
-        assert_eq!(lex("#".to_string()), Ok(vec![Token::Hash]));
+        assert_eq!(lex("#".to_string()), Ok(vec![Token::Comment("TODO: fix me dude".to_string())]));
         assert_eq!(lex("{".to_string()), Ok(vec![Token::LeftBrace]));
         assert_eq!(lex("}".to_string()), Ok(vec![Token::RightBrace]));
         assert_eq!(lex("(".to_string()), Ok(vec![Token::LeftParenthesis]));
@@ -175,6 +197,28 @@ mod tests {
         assert_eq!(lex("let".to_string()), Ok(vec![Token::Let]));
         assert_eq!(lex("const".to_string()), Ok(vec![Token::Const]));
     }
+
+    #[test]
+    fn lexer_numbers() {
+        assert_eq!(lex("0".to_string()), Ok(vec![Token::Integer(0)]));
+        assert_eq!(lex("1".to_string()), Ok(vec![Token::Integer(1)]));
+        assert_eq!(lex("10".to_string()), Ok(vec![Token::Integer(10)]));
+        // assert_eq!(lex("-10".to_string()), Ok(vec![Token::Integer(-10)])); // TODO: add support for negative numbers
+        assert_eq!(lex("4294967296".to_string()), Ok(vec![Token::Integer(2.pow(32) as u32)]));
+    }
+
+    // #[test]
+    // fn lexer_multiple_tokens() {
+    //     assert_eq!(lex("let x = 10;".to_string()), Ok(vec![Token::Let]));
+    //     assert_eq!(lex("else".to_string()), Ok(vec![Token::Else]));
+    //     // assert_eq!(lex("return".to_string()), Ok(vec![Token::Return]));
+    //     assert_eq!(lex("fn".to_string()), Ok(vec![Token::Function]));
+    //     assert_eq!(lex("loop".to_string()), Ok(vec![Token::Loop]));
+    //     assert_eq!(lex("for".to_string()), Ok(vec![Token::For]));
+    //     assert_eq!(lex("in".to_string()), Ok(vec![Token::In]));
+    //     assert_eq!(lex("let".to_string()), Ok(vec![Token::Let]));
+    //     assert_eq!(lex("const".to_string()), Ok(vec![Token::Const]));
+    // }
 
     #[test]
     fn test_lexer_contains() {
