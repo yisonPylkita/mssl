@@ -5,7 +5,7 @@ I wanted to understand how compiler works so I created one
 ### Code example
 
 ```
-# My simple programming language
+# My simple scripting language
 
 # This is a comment
 # Every comment starts with # and ends with \n
