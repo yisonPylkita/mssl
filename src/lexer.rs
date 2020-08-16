@@ -20,6 +20,7 @@ pub enum Token {
     Quote,
     DoubleQuote,
     ExclamationMark,
+    Hash,
     LeftBrace,
     RightBrace,
     LeftParenthesis,
@@ -76,7 +77,7 @@ impl Lexer {
                 continue;
             }
             // TODO: add UTF-8 string support
-            if r#"+-*/\.,:;=><"'!{}()[]"#.contains(code_chars[self.index]) {
+            if code_chars[self.index].is_ascii_punctuation() {
                 let found_token = match code_chars[self.index] {
                     // Actually in some cases we should do more here. For example with " or '
                     '+' => Token::Plus,
@@ -94,6 +95,7 @@ impl Lexer {
                     '\'' => Token::Quote,
                     '"' => Token::DoubleQuote,
                     '!' => Token::ExclamationMark,
+                    '#' => Token::Hash,
                     '{' => Token::LeftBrace,
                     '}' => Token::RightBrace,
                     '(' => Token::LeftParenthesis,
@@ -152,6 +154,7 @@ mod tests {
         assert_eq!(lex("\"".to_string()), Ok(vec![Token::DoubleQuote]));
         assert_eq!(lex("\'".to_string()), Ok(vec![Token::Quote]));
         assert_eq!(lex("!".to_string()), Ok(vec![Token::ExclamationMark]));
+        assert_eq!(lex("#".to_string()), Ok(vec![Token::Hash]));
         assert_eq!(lex("{".to_string()), Ok(vec![Token::LeftBrace]));
         assert_eq!(lex("}".to_string()), Ok(vec![Token::RightBrace]));
         assert_eq!(lex("(".to_string()), Ok(vec![Token::LeftParenthesis]));
