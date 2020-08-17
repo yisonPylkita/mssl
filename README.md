@@ -1,5 +1,7 @@
 # mssl - My Simple Scripting Language
 
+Currently very much in progress!!! - only lexer kind of works right now
+
 I wanted to understand how compiler works so I created one
 
 ### Code example
