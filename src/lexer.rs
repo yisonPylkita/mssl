@@ -39,7 +39,7 @@ pub enum Token {
     // Others
     Comment(String),
     StringLiteral(String),
-    Integer(u32),
+    Integer(i32),
     // TODO: add support for negative numbers
     Name(String),
 }
@@ -228,12 +228,35 @@ mod tests {
     }
 
     #[test]
-    fn lexer_numbers() {
+    fn lexer_integers() {
         assert_eq!(lex("0".to_string()), Ok(vec![Token::Integer(0)]));
         assert_eq!(lex("1".to_string()), Ok(vec![Token::Integer(1)]));
         assert_eq!(lex("10".to_string()), Ok(vec![Token::Integer(10)]));
-        // assert_eq!(lex("-10".to_string()), Ok(vec![Token::Integer(-10)])); // TODO: add support for negative numbers
-        // assert_eq!(lex("4294967296".to_string()), Ok(vec![Token::Integer(2.pow(32) as u32)]));
+        assert_eq!(
+            lex("2147483647".to_string()),
+            Ok(vec![Token::Integer(std::i32::MAX)])
+        );
+        // TODO: is this approach good?
+        assert_eq!(
+            lex("-0".to_string()),
+            Ok(vec![Token::Minus, Token::Integer(0)])
+        );
+        assert_eq!(
+            lex("-1".to_string()),
+            Ok(vec![Token::Minus, Token::Integer(1)])
+        );
+        assert_eq!(
+            lex("-2".to_string()),
+            Ok(vec![Token::Minus, Token::Integer(2)])
+        );
+        assert_eq!(
+            lex("-45".to_string()),
+            Ok(vec![Token::Minus, Token::Integer(45)])
+        );
+        assert_eq!(
+            lex("-2147483647".to_string()),
+            Ok(vec![Token::Minus, Token::Integer(std::i32::MAX)])
+        );
     }
 
     #[test]
