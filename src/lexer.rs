@@ -152,8 +152,8 @@ impl Lexer {
                 };
 
                 if !found_keyword {
-                    // Integer(String),
                     if code_chars[self.index].is_numeric() {
+                        // Integer(String),
                         let mut number_buffer = String::new();
                         loop {
                             if self.index < code_chars.len() && code_chars[self.index].is_numeric()
@@ -166,6 +166,21 @@ impl Lexer {
                         }
                         let parsed_number = number_buffer.parse().unwrap();
                         tokens.push(Token::Integer(parsed_number));
+                    } else {
+                        // Name(String)
+                        let mut name_buffer = String::new();
+                        loop {
+                            if self.index < code_chars.len()
+                                && (code_chars[self.index].is_ascii_alphanumeric()
+                                    || code_chars[self.index] == '_')
+                            {
+                                name_buffer.push(code_chars[self.index]);
+                                self.index += 1;
+                            } else {
+                                break;
+                            }
+                        }
+                        tokens.push(Token::Name(name_buffer));
                     }
                 }
             }
@@ -260,6 +275,27 @@ mod tests {
     }
 
     #[test]
+    fn lexer_keywords() {
+        assert_eq!(lex("if".to_string()), Ok(vec![Token::If]));
+        assert_eq!(lex("else".to_string()), Ok(vec![Token::Else]));
+        assert_eq!(lex("return".to_string()), Ok(vec![Token::Return]));
+        assert_eq!(lex("fn".to_string()), Ok(vec![Token::Function]));
+        assert_eq!(lex("loop".to_string()), Ok(vec![Token::Loop]));
+        assert_eq!(lex("for".to_string()), Ok(vec![Token::For]));
+        assert_eq!(lex("in".to_string()), Ok(vec![Token::In]));
+        assert_eq!(lex("let".to_string()), Ok(vec![Token::Let]));
+        assert_eq!(lex("const".to_string()), Ok(vec![Token::Const]));
+    }
+
+    #[test]
+    fn lexer_names() {
+        assert_eq!(
+            lex("v1".to_string()),
+            Ok(vec![Token::Name("v1".to_string())])
+        );
+    }
+
+    #[test]
     fn lexer_comments() {
         assert_eq!(
             lex("# Example comment\n".to_string()),
@@ -267,18 +303,31 @@ mod tests {
         );
     }
 
-    // #[test]
-    // fn lexer_multiple_tokens() {
-    //     assert_eq!(lex("let x = 10;".to_string()), Ok(vec![Token::Let]));
-    //     assert_eq!(lex("else".to_string()), Ok(vec![Token::Else]));
-    //     // assert_eq!(lex("return".to_string()), Ok(vec![Token::Return]));
-    //     assert_eq!(lex("fn".to_string()), Ok(vec![Token::Function]));
-    //     assert_eq!(lex("loop".to_string()), Ok(vec![Token::Loop]));
-    //     assert_eq!(lex("for".to_string()), Ok(vec![Token::For]));
-    //     assert_eq!(lex("in".to_string()), Ok(vec![Token::In]));
-    //     assert_eq!(lex("let".to_string()), Ok(vec![Token::Let]));
-    //     assert_eq!(lex("const".to_string()), Ok(vec![Token::Const]));
-    // }
+    #[test]
+    fn lexer_multiple_tokens() {
+        // assert_eq!(
+        //     lex("let x = 10;".to_string()),
+        //     Ok(vec![
+        //         Token::Let,
+        //         Token::Name("x".to_string()),
+        //         Token::Assign,
+        //         Token::Integer(10),
+        //         Token::Semicolon
+        //     ])
+        // );
+
+        assert_eq!(
+            // lex("let x = 10;".to_string()),
+            lex("let x = 10;".to_string()),
+            Ok(vec![
+                Token::Let,
+                Token::Name("x".to_string()),
+                Token::Assign,
+                Token::Integer(10),
+                Token::Semicolon
+            ])
+        );
+    }
 
     #[test]
     fn test_lexer_contains() {
