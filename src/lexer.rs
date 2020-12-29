@@ -1,19 +1,3 @@
-// Macro that simplifies embedding mssl code in Rust
-// Examples of usage:
-// lex!(const a_var = 15;)
-// lex!(let x = 10; println("Hello there"))
-#[macro_export]
-macro_rules! lex {
-    ( $( $x:expr ),* ) => {
-        lexer::Lexer::new()
-            .tokenize("")
-            .expect("Could not parse code from lex! macro");
-        // $(
-        //     temp_vec.push($x);
-        // )*
-    };
-}
-
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token {
     Invalid,
