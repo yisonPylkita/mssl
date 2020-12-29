@@ -1,6 +1,4 @@
-#[derive(Debug)]
-#[derive(Clone)]
-#[derive(PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Token {
     Invalid,
 
@@ -46,9 +44,17 @@ pub enum Token {
     Name(String),
 }
 
-const keywords_map: [(&str, Token); 9] = [("if", Token::If), ("else", Token::Else), ("return", Token::Return),
-                                                        ("fn", Token::Function), ("loop", Token::Loop), ("for", Token::For),
-                                                        ("in", Token::In), ("let", Token::Let), ("const", Token::Const)];
+const KEYWORDS_MAP: [(&str, Token); 9] = [
+    ("if", Token::If),
+    ("else", Token::Else),
+    ("return", Token::Return),
+    ("fn", Token::Function),
+    ("loop", Token::Loop),
+    ("for", Token::For),
+    ("in", Token::In),
+    ("let", Token::Let),
+    ("const", Token::Const),
+];
 
 pub struct Lexer {
     index: usize,
@@ -56,9 +62,7 @@ pub struct Lexer {
 
 impl Lexer {
     pub fn new() -> Lexer {
-        Lexer {
-            index: 0,
-        }
+        Lexer { index: 0 }
     }
 
     pub fn tokenize(&mut self, source_code: &String) -> Result<Vec<Token>, String> {
@@ -111,12 +115,14 @@ impl Lexer {
                 self.index += 1;
                 tokens.push(found_token);
             } else {
-                let keword_result = keywords_map.iter().position(|token| Lexer::contains(source_code.to_string(), token.0.to_string(), self.index));
+                let keword_result = KEYWORDS_MAP.iter().position(|token| {
+                    Lexer::contains(source_code.to_string(), token.0.to_string(), self.index)
+                });
                 let mut found_keyword = false; // TODO: fix this crap. Do a proper if/else if/else outside
                 match keword_result {
                     Some(index) => {
-                        tokens.push(keywords_map[index].1.clone());
-                        self.index += keywords_map[index].0.len();
+                        tokens.push(KEYWORDS_MAP[index].1.clone());
+                        self.index += KEYWORDS_MAP[index].0.len();
                         found_keyword = true;
                     }
                     None => (),
@@ -127,7 +133,8 @@ impl Lexer {
                     if code_chars[self.index].is_numeric() {
                         let mut number_buffer = String::new();
                         loop {
-                            if code_chars[self.index].is_numeric() {
+                            if self.index < code_chars.len() && code_chars[self.index].is_numeric()
+                            {
                                 number_buffer.push(code_chars[self.index]);
                                 self.index += 1;
                             } else {
@@ -176,7 +183,7 @@ mod tests {
         assert_eq!(lex("\"".to_string()), Ok(vec![Token::DoubleQuote]));
         assert_eq!(lex("\'".to_string()), Ok(vec![Token::Quote]));
         assert_eq!(lex("!".to_string()), Ok(vec![Token::ExclamationMark]));
-        assert_eq!(lex("#".to_string()), Ok(vec![Token::Comment("TODO: fix me dude".to_string())]));
+        assert_eq!(lex("#".to_string()), Ok(vec![]));
         assert_eq!(lex("{".to_string()), Ok(vec![Token::LeftBrace]));
         assert_eq!(lex("}".to_string()), Ok(vec![Token::RightBrace]));
         assert_eq!(lex("(".to_string()), Ok(vec![Token::LeftParenthesis]));
@@ -223,16 +230,40 @@ mod tests {
     #[test]
     fn test_lexer_contains() {
         // Positive tests
-        assert_eq!(Lexer::contains("let".to_string(), "let".to_string(), 0), true);
-        assert_eq!(Lexer::contains(" let".to_string(), "let".to_string(), 1), true);
-        assert_eq!(Lexer::contains(" let x".to_string(), "let".to_string(), 1), true);
+        assert_eq!(
+            Lexer::contains("let".to_string(), "let".to_string(), 0),
+            true
+        );
+        assert_eq!(
+            Lexer::contains(" let".to_string(), "let".to_string(), 1),
+            true
+        );
+        assert_eq!(
+            Lexer::contains(" let x".to_string(), "let".to_string(), 1),
+            true
+        );
 
         // Negative tests
         assert_eq!(Lexer::contains("".to_string(), "let".to_string(), 0), false);
-        assert_eq!(Lexer::contains("".to_string(), "let".to_string(), 10), false);
-        assert_eq!(Lexer::contains("l".to_string(), "let".to_string(), 0), false);
-        assert_eq!(Lexer::contains("l".to_string(), "let".to_string(), 2), false);
-        assert_eq!(Lexer::contains("l".to_string(), "let".to_string(), 3), false);
-        assert_eq!(Lexer::contains("le".to_string(), "let".to_string(), 0), false);
+        assert_eq!(
+            Lexer::contains("".to_string(), "let".to_string(), 10),
+            false
+        );
+        assert_eq!(
+            Lexer::contains("l".to_string(), "let".to_string(), 0),
+            false
+        );
+        assert_eq!(
+            Lexer::contains("l".to_string(), "let".to_string(), 2),
+            false
+        );
+        assert_eq!(
+            Lexer::contains("l".to_string(), "let".to_string(), 3),
+            false
+        );
+        assert_eq!(
+            Lexer::contains("le".to_string(), "let".to_string(), 0),
+            false
+        );
     }
 }
