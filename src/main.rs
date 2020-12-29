@@ -1,4 +1,4 @@
-pub mod lexer;
+mod lexer;
 
 fn main() {
     let mut lex = lexer::Lexer::new();
