@@ -60,6 +60,18 @@ pub struct Lexer {
     index: usize,
 }
 
+fn skip_first_and_get_all_chars_till(source: Vec<char>, terminator: char) -> Vec<char> {
+    let mut index = 1;
+    loop {
+        if index < source.len() && source[index] != terminator {
+            index += 1;
+        } else {
+            break;
+        }
+    }
+    source[1..index].to_vec()
+}
+
 impl Lexer {
     pub fn new() -> Lexer {
         Lexer { index: 0 }
@@ -103,7 +115,18 @@ impl Lexer {
                     '\'' => Token::Quote, // StringLiteral(String), -> this should be handled when ' is detected
                     '"' => Token::DoubleQuote, // StringLiteral(String), -> this should be handled when " is detected
                     '!' => Token::ExclamationMark,
-                    '#' => Token::Comment("TODO: fix me".to_string()),
+                    '#' => {
+                        if code_chars.len() > self.index + 1 {
+                            let comment_vec = skip_first_and_get_all_chars_till(
+                                code_chars[self.index..].to_vec(),
+                                '\n',
+                            );
+                            self.index += comment_vec.len() + 1; // We're adding skipped # character here
+                            Token::Comment(comment_vec.into_iter().collect())
+                        } else {
+                            Token::Comment("".to_string())
+                        }
+                    }
                     '{' => Token::LeftBrace,
                     '}' => Token::RightBrace,
                     '(' => Token::LeftParenthesis,
@@ -183,7 +206,6 @@ mod tests {
         assert_eq!(lex("\"".to_string()), Ok(vec![Token::DoubleQuote]));
         assert_eq!(lex("\'".to_string()), Ok(vec![Token::Quote]));
         assert_eq!(lex("!".to_string()), Ok(vec![Token::ExclamationMark]));
-        assert_eq!(lex("#".to_string()), Ok(vec![]));
         assert_eq!(lex("{".to_string()), Ok(vec![Token::LeftBrace]));
         assert_eq!(lex("}".to_string()), Ok(vec![Token::RightBrace]));
         assert_eq!(lex("(".to_string()), Ok(vec![Token::LeftParenthesis]));
@@ -212,6 +234,14 @@ mod tests {
         assert_eq!(lex("10".to_string()), Ok(vec![Token::Integer(10)]));
         // assert_eq!(lex("-10".to_string()), Ok(vec![Token::Integer(-10)])); // TODO: add support for negative numbers
         // assert_eq!(lex("4294967296".to_string()), Ok(vec![Token::Integer(2.pow(32) as u32)]));
+    }
+
+    #[test]
+    fn lexer_comments() {
+        assert_eq!(
+            lex("# Example comment\n".to_string()),
+            Ok(vec![Token::Comment(" Example comment".to_string())])
+        );
     }
 
     // #[test]
