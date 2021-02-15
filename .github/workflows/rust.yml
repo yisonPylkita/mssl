@@ -11,15 +11,27 @@ env:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout sources
+      uses: actions/checkout@v2
+
     - name: Build
       run: cargo build --verbose
+
     - name: Lint
       run: cargo clippy
+
     - name: Test
       run: cargo test --verbose
+    
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout sources
+      uses: actions/checkout@v2
+
+    - name: TOML linter
+      uses: yisonPylkita/gh-action-toml-linter@0.0.3
+
 
