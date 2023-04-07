@@ -5,3 +5,4 @@ authors = ["Wojciech Bartnik <yisonPylkita@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+test-case = "3.1.0"

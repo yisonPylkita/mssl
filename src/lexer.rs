@@ -5,7 +5,7 @@ pub enum Token {
     // symbols
     Plus,
     Minus,
-    Multiply,
+    Star,
     Slash,
     BackSlash,
     Dot,
@@ -102,7 +102,7 @@ impl Lexer {
                     // Actually in some cases we should do more here. For example with " or '
                     '+' => Token::Plus,
                     '-' => Token::Minus,
-                    '*' => Token::Multiply,
+                    '*' => Token::Star,
                     '/' => Token::Slash,
                     '\\' => Token::BackSlash,
                     '.' => Token::Dot,
@@ -195,38 +195,39 @@ impl Lexer {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use test_case::test_case;
 
     fn lex(code: String) -> Result<Vec<Token>, String> {
         let mut lex = Lexer::new();
         lex.tokenize(&code)
     }
 
-    #[test]
-    fn lexer_single_sign() {
-        assert_eq!(lex("".to_string()), Ok(vec![]));
-        assert_eq!(lex(" ".to_string()), Ok(vec![]));
-        assert_eq!(lex("let".to_string()), Ok(vec![Token::Let]));
-        assert_eq!(lex("+".to_string()), Ok(vec![Token::Plus]));
-        assert_eq!(lex("-".to_string()), Ok(vec![Token::Minus]));
-        assert_eq!(lex("*".to_string()), Ok(vec![Token::Multiply]));
-        assert_eq!(lex("/".to_string()), Ok(vec![Token::Slash]));
-        assert_eq!(lex("\\".to_string()), Ok(vec![Token::BackSlash]));
-        assert_eq!(lex(".".to_string()), Ok(vec![Token::Dot]));
-        assert_eq!(lex(",".to_string()), Ok(vec![Token::Comma]));
-        assert_eq!(lex(":".to_string()), Ok(vec![Token::Colon]));
-        assert_eq!(lex(";".to_string()), Ok(vec![Token::Semicolon]));
-        assert_eq!(lex("=".to_string()), Ok(vec![Token::Assign]));
-        assert_eq!(lex(">".to_string()), Ok(vec![Token::Greater]));
-        assert_eq!(lex("<".to_string()), Ok(vec![Token::Lower]));
-        assert_eq!(lex("\"".to_string()), Ok(vec![Token::DoubleQuote]));
-        assert_eq!(lex("\'".to_string()), Ok(vec![Token::Quote]));
-        assert_eq!(lex("!".to_string()), Ok(vec![Token::ExclamationMark]));
-        assert_eq!(lex("{".to_string()), Ok(vec![Token::LeftBrace]));
-        assert_eq!(lex("}".to_string()), Ok(vec![Token::RightBrace]));
-        assert_eq!(lex("(".to_string()), Ok(vec![Token::LeftParenthesis]));
-        assert_eq!(lex(")".to_string()), Ok(vec![Token::RightParenthesis]));
-        assert_eq!(lex("[".to_string()), Ok(vec![Token::LeftSquareBracket]));
-        assert_eq!(lex("]".to_string()), Ok(vec![Token::RightSquareBracket]));
+    #[test_case("" => Vec::<Token>::new(); "empty string")]
+    #[test_case(" " => Vec::<Token>::new(); "space is not a token")]
+    #[test_case("let" => vec![Token::Let]; "let token")]
+    #[test_case("+" => vec![Token::Plus]; "plus token")]
+    #[test_case("-" => vec![Token::Minus]; "minus token")]
+    #[test_case("*" => vec![Token::Star]; "star token")]
+    #[test_case("/" => vec![Token::Slash]; "slash token")]
+    #[test_case("\\" => vec![Token::BackSlash]; "backslash token")]
+    #[test_case("," => vec![Token::Comma]; "comma token")]
+    #[test_case(":" => vec![Token::Colon]; "colon token")]
+    #[test_case(";" => vec![Token::Semicolon]; "semicolon token")]
+    #[test_case("=" => vec![Token::Assign]; "assign token")]
+    #[test_case(">" => vec![Token::Greater]; "greater token")]
+    #[test_case("<" => vec![Token::Lower]; "lower token")]
+    #[test_case("\"" => vec![Token::DoubleQuote]; "double quote token")]
+    #[test_case("\'" => vec![Token::Quote]; "quote token")]
+    #[test_case("!" => vec![Token::ExclamationMark]; "exclamation mark token")]
+    #[test_case("{" => vec![Token::LeftBrace]; "left brace token")]
+    #[test_case("}" => vec![Token::RightBrace]; "right brace token")]
+    #[test_case("(" => vec![Token::LeftParenthesis]; "left parenthesis token")]
+    #[test_case(")" => vec![Token::RightParenthesis]; "right parenthesis token")]
+    #[test_case("[" => vec![Token::LeftSquareBracket]; "left square bracket token")]
+    #[test_case("]" => vec![Token::RightSquareBracket]; "right square bracket token")]
+
+    fn multiplication_tests(input: &str) -> Vec<Token> {
+        Lexer::new().tokenize(&input.to_string()).unwrap()
     }
 
     #[test]
@@ -305,19 +306,7 @@ mod tests {
 
     #[test]
     fn lexer_multiple_tokens() {
-        // assert_eq!(
-        //     lex("let x = 10;".to_string()),
-        //     Ok(vec![
-        //         Token::Let,
-        //         Token::Name("x".to_string()),
-        //         Token::Assign,
-        //         Token::Integer(10),
-        //         Token::Semicolon
-        //     ])
-        // );
-
         assert_eq!(
-            // lex("let x = 10;".to_string()),
             lex("let x = 10;".to_string()),
             Ok(vec![
                 Token::Let,
