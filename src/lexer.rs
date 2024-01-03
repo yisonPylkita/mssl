@@ -16,7 +16,6 @@ pub enum Token {
     Greater,
     Lower,
     Quote,
-    DoubleQuote,
     ExclamationMark,
     LeftBrace,
     RightBrace,
@@ -113,7 +112,18 @@ impl Lexer {
                     '>' => Token::Greater,
                     '<' => Token::Lower,
                     '\'' => Token::Quote, // StringLiteral(String), -> this should be handled when ' is detected
-                    '"' => Token::DoubleQuote, // StringLiteral(String), -> this should be handled when " is detected
+                    '"' => {
+                        if code_chars.len() > self.index + 1 {
+                            let string_vec = skip_first_and_get_all_chars_till(
+                                code_chars[self.index..].to_vec(),
+                                '"',
+                            );
+                            self.index += string_vec.len() + 1; // We're adding skipped " character here
+                            Token::StringLiteral(string_vec.into_iter().collect())
+                        } else {
+                            Token::StringLiteral("".to_string())
+                        }
+                    }
                     '!' => Token::ExclamationMark,
                     '#' => {
                         if code_chars.len() > self.index + 1 {
@@ -216,7 +226,7 @@ mod tests {
     #[test_case("=" => vec![Token::Assign]; "assign token")]
     #[test_case(">" => vec![Token::Greater]; "greater token")]
     #[test_case("<" => vec![Token::Lower]; "lower token")]
-    #[test_case("\"" => vec![Token::DoubleQuote]; "double quote token")]
+    #[test_case("\"" => vec![Token::StringLiteral("".to_string())]; "Single double quote should be interpreted as beggining of StringLiteral")]
     #[test_case("\'" => vec![Token::Quote]; "quote token")]
     #[test_case("!" => vec![Token::ExclamationMark]; "exclamation mark token")]
     #[test_case("{" => vec![Token::LeftBrace]; "left brace token")]
@@ -356,5 +366,13 @@ mod tests {
             Lexer::contains("le".to_string(), "let".to_string(), 0),
             false
         );
+    }
+
+    #[test]
+    fn string_literal() {
+        assert_eq!(
+            lex("\"Test string\"".to_string()),
+            Ok(vec![Token::StringLiteral("Test string".to_string())])
+        )
     }
 }
