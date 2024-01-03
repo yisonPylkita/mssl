@@ -24,9 +24,3 @@ jobs:
 
     - name: Test
       run: cargo test --verbose
-    
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout sources
-      uses: actions/checkout@v2
