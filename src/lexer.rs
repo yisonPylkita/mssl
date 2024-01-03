@@ -15,7 +15,6 @@ pub enum Token {
     Assign,
     Greater,
     Lower,
-    Quote,
     ExclamationMark,
     LeftBrace,
     RightBrace,
@@ -59,10 +58,10 @@ pub struct Lexer {
     index: usize,
 }
 
-fn skip_first_and_get_all_chars_till(source: Vec<char>, terminator: char) -> Vec<char> {
+fn skip_first_and_get_all_chars_till(source: Vec<char>, terminators: Vec<char>) -> Vec<char> {
     let mut index = 1;
     loop {
-        if index < source.len() && source[index] != terminator {
+        if index < source.len() && !terminators.contains(&source[index]) {
             index += 1;
         } else {
             break;
@@ -111,12 +110,11 @@ impl Lexer {
                     '=' => Token::Assign,
                     '>' => Token::Greater,
                     '<' => Token::Lower,
-                    '\'' => Token::Quote, // StringLiteral(String), -> this should be handled when ' is detected
-                    '"' => {
+                     '\'' | '"' => {
                         if code_chars.len() > self.index + 1 {
                             let string_vec = skip_first_and_get_all_chars_till(
                                 code_chars[self.index..].to_vec(),
-                                '"',
+                                vec!['\'', '"'],
                             );
                             self.index += string_vec.len() + 1; // We're adding skipped " character here
                             Token::StringLiteral(string_vec.into_iter().collect())
@@ -129,7 +127,7 @@ impl Lexer {
                         if code_chars.len() > self.index + 1 {
                             let comment_vec = skip_first_and_get_all_chars_till(
                                 code_chars[self.index..].to_vec(),
-                                '\n',
+                                vec!['\n'],
                             );
                             self.index += comment_vec.len() + 1; // We're adding skipped # character here
                             Token::Comment(comment_vec.into_iter().collect())
@@ -226,8 +224,8 @@ mod tests {
     #[test_case("=" => vec![Token::Assign]; "assign token")]
     #[test_case(">" => vec![Token::Greater]; "greater token")]
     #[test_case("<" => vec![Token::Lower]; "lower token")]
+    #[test_case("'" => vec![Token::StringLiteral("".to_string())]; "Single quote should be interpreted as beggining of StringLiteral")]
     #[test_case("\"" => vec![Token::StringLiteral("".to_string())]; "Single double quote should be interpreted as beggining of StringLiteral")]
-    #[test_case("\'" => vec![Token::Quote]; "quote token")]
     #[test_case("!" => vec![Token::ExclamationMark]; "exclamation mark token")]
     #[test_case("{" => vec![Token::LeftBrace]; "left brace token")]
     #[test_case("}" => vec![Token::RightBrace]; "right brace token")]
@@ -371,8 +369,13 @@ mod tests {
     #[test]
     fn string_literal() {
         assert_eq!(
+            lex("\'Test string\'".to_string()),
+            Ok(vec![Token::StringLiteral("Test string".to_string())])
+        );
+
+        assert_eq!(
             lex("\"Test string\"".to_string()),
             Ok(vec![Token::StringLiteral("Test string".to_string())])
-        )
+        );
     }
 }
