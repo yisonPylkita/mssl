@@ -6,7 +6,7 @@ I wanted to understand how compiler works so I created one
 
 ### Code example
 
-```
+```perl
 # My simple scripting language
 
 # This is a comment
