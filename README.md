@@ -1,5 +1,7 @@
 # mssl - My Simple Scripting Language
 
+[![Rust](https://github.com/yisonPylkita/mssl/actions/workflows/rust.yml/badge.svg)](https://github.com/yisonPylkita/mssl/actions/workflows/rust.yml)
+
 Currently very much in progress!!! - only lexer kind of works right now
 
 I wanted to understand how compiler works so I created one
