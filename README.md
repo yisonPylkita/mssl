@@ -26,9 +26,17 @@ let first_num = 2;
 let second_num = 5;
 ```
 
-## Instalation
+## Usage
 
-// TODO: fill this
+### Just lexer result
+```bash
+cargo run -- lex "let x = 10; println(\"Hello world\");"
+```
+
+### Run provided code
+```bash
+cargo run -- run "let x = 10; println(\"Hello world\");"
+```
 
 ### Vim config
 

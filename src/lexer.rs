@@ -75,13 +75,10 @@ static KEYWORD_MAPPINGS: phf::Map<&'static str, Token> = phf_map! {
     "const" => Token::Const,
 };
 
+#[derive(Default)]
 pub struct Lexer {}
 
 impl Lexer {
-    pub fn new() -> Lexer {
-        Lexer {}
-    }
-
     pub fn tokenize(&mut self, source_code: &str) -> Result<Vec<Token>, &str> {
         let mut tokens: Vec<Token> = Vec::new();
         let mut code_iter = source_code.chars().peekable();
@@ -155,7 +152,7 @@ mod tests {
     use test_case::test_case;
 
     fn lex(code: &str) -> Result<Vec<Token>, String> {
-        let mut lex = Lexer::new();
+        let mut lex = Lexer::default();
         lex.tokenize(code).map_err(|err| err.to_string())
     }
 
@@ -181,7 +178,7 @@ mod tests {
     #[test_case("]" => vec![Token::RightSquareBracket]; "right square bracket token")]
 
     fn multiplication_tests(input: &str) -> Vec<Token> {
-        Lexer::new().tokenize(&input).unwrap()
+        Lexer::default().tokenize(&input).unwrap()
     }
 
     #[test]
@@ -250,6 +247,34 @@ mod tests {
                 Token::Assign,
                 Token::Integer(10),
                 Token::Semicolon
+            ])
+        );
+
+        assert_eq!(
+            lex("# Example comment\n fn foo(a: i32, b: string) -> bool\n { return b + a; } "),
+            Ok(vec![
+                Token::Comment(" Example comment".to_string()),
+                Token::Function,
+                Token::Name("foo".to_string()),
+                Token::LeftParenthesis,
+                Token::Name("a".to_string()),
+                Token::Colon,
+                Token::Name("i32".to_string()),
+                Token::Comma,
+                Token::Name("b".to_string()),
+                Token::Colon,
+                Token::Name("string".to_string()),
+                Token::RightParenthesis,
+                Token::Minus,
+                Token::Greater,
+                Token::Name("bool".to_string()),
+                Token::LeftBrace,
+                Token::Return,
+                Token::Name("b".to_string()),
+                Token::Plus,
+                Token::Name("a".to_string()),
+                Token::Semicolon,
+                Token::RightBrace
             ])
         );
     }
