@@ -1,6 +1,5 @@
-use std::collections::HashMap;
-
 use crate::lexer::Token;
+use std::collections::HashMap;
 
 #[derive(Debug)]
 pub enum Value {
@@ -33,10 +32,8 @@ impl Runtime {
                         Token::StringLiteral(val) => Value::String(val.clone()),
                         _ => panic!("Only simple assignments of int or string are supported now"),
                     };
-                    if let Some(token) = ast_iter.peek() {
-                        if let Token::Semicolon = token {
-                            ast_iter.next().unwrap();
-                        }
+                    if let Some(Token::Semicolon) = ast_iter.peek() {
+                        ast_iter.next().unwrap();
                     }
 
                     self.variables.insert(var_name, value);
@@ -56,10 +53,8 @@ impl Runtime {
                             Token::RightParenthesis => {}
                             _ => panic!(") sign expected"),
                         };
-                        if let Some(token) = ast_iter.peek() {
-                            if let Token::Semicolon = token {
-                                ast_iter.next().unwrap();
-                            }
+                        if let Some(Token::Semicolon) = ast_iter.peek() {
+                            ast_iter.next().unwrap();
                         }
 
                         println!("{}", msg_to_print);

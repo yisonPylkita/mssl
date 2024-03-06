@@ -2,13 +2,13 @@
 name = "mssl"
 version = "0.1.0"
 authors = ["Wojciech Bartnik <yisonPylkita@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
-anyhow = "*"
+anyhow = "1.0.80"
 clap = { version = "4.5.1", features = ["derive"] }
 itertools = "0.12.1"
-phf = { version = "0.11.2", features = ["macros"] }
+lazy_static = "1.4.0"
 
 [dev-dependencies]
 test-case = "3.1.0"
